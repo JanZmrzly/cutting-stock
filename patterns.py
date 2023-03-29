@@ -29,7 +29,7 @@ class Node:
     def extend(self):
         self.extended = True
 
-    def put_in_pattern(self):
+    def put_in_patterns(self):
         self.in_patterns = True
 
     def add_children(self, children):
@@ -37,6 +37,9 @@ class Node:
     
     def get_possition(self, position):
         self.pattern_position = np.vstack((self.pattern_position, position))
+        # remove initial [0,0] when is called first time
+        if not any(self.pattern_position[0]):
+            self.pattern_position = self.pattern_position[1:]
 
 class Tree:
     def __init__(self, product_length:int, items_length:np.array, items_demand:np.array):
@@ -81,8 +84,9 @@ class Tree:
                     node.material_rest >= item and
                     node.extended == False):
                     self.get_children(node, self.items_length[i+1])
-               
         
+        self.nodes.remove(first_node)
+
 class Patterns:
     def __init__(self, product_length:int, items_length:np.array, items_demand:np.array):
         self.product_length = product_length
@@ -107,7 +111,6 @@ class Patterns:
         self.patterns = np.zeros((n,m))
         
         # placing no-extended nodes to patterns matrix
-        added_nodes = []
         grouped_nodes = itertools.groupby(sorted_tree, key=lambda node: node.extended)
         selected_nodes = [node for key, group in grouped_nodes for node in group if key == False]
         for i, node in enumerate(selected_nodes):
@@ -116,31 +119,31 @@ class Patterns:
             self.patterns[pos][i] = node.cuts[0][1]
             # placing resting material
             self.patterns[n-1][i] = node.material_rest
+            # update node info
             node.get_possition(np.array([pos, i]))
-            node.put_in_pattern()
-            added_nodes.append(node)
+            node.put_in_patterns()
 
         # placing extended nodes to patterns matrix
         grouped_nodes = itertools.groupby(sorted_tree, key=lambda node: node.extended)
         selected_nodes = [node for key, group in grouped_nodes for node in group if key == True]
-        # [print(child) for node in selected_nodes for child in node.children]
-        for node in selected_nodes:
-            for child in node.children:
-                # i = child.pattern_position[0]
-                # j = child.pattern_position[1]-1
-                print(child.pattern_position.shape)
-                # if i > 0 and j > 0:
-                #     self.patterns[i][j] = node.cuts[0][1]
-                #     print(i, j)
-                
-        
-        print(self.patterns)  
-
+        for _ in range(np.size(self.items_length)-1):
+            for node in selected_nodes:
+                for child in node.children:
+                    for k in range(child.pattern_position.shape[0]):
+                        if any(child.pattern_position[k]):
+                            j = child.pattern_position[k][0]-1
+                            i = child.pattern_position[k][1]
+                            self.patterns[j][i] = node.cuts[0][1]
+                            # update node info
+                            node.get_possition(np.array([j, i]))
+                            node.put_in_patterns()                                       
+                        
 if __name__ == "__main__":
     prod_len = 15
     items_len = np.array([4, 6, 7])
-    items_demand = np.array([80, 50 ,100])
+    items_demand = np.array([80, 50, 100])
     pt = Patterns(prod_len, items_len, items_demand)
     pt.create_tree()
     pt.create_patterns()
+    print(pt.patterns)
     # [print(node) for node in pt.tree_model.nodes]
