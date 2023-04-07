@@ -100,7 +100,7 @@ class Plot(QtWidgets.QWidget):
         self.initUI()
 
     def initUI(self):
-        self.figure = plt.figure(figsize=(5,2))
+        self.figure = plt.figure(figsize=(5,4))
         self.canvas = FigureCanvas(self.figure)
 
         layout = QtWidgets.QVBoxLayout()
