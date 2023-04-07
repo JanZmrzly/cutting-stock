@@ -106,7 +106,6 @@ class Plot(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.canvas)
         self.setLayout(layout)
-
     
     def plot_data(self, results, items_length):
         items_length = np.array(items_length)
