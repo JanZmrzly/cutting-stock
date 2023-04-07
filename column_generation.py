@@ -4,9 +4,9 @@
 # zdroj: https://gist.github.com/Bart6114/8414730
 
 import numpy as np
-from pulp import (LpProblem, LpConstraintVar, LpVariable,
+from pulp import (LpProblem, LpConstraintVar, LpVariable, apis,
                   lpSum, value,
-                  LpMinimize, LpConstraintGE, LpContinuous, LpInteger)
+                  LpMinimize, LpConstraintEQ, LpContinuous, LpInteger)
 
 class MasterProblem:
     def __init__(self, product_length:int, items_length:np.array, items_demand:np.array, init_patterns:np.array):
@@ -17,7 +17,7 @@ class MasterProblem:
 
         self.constraints = []
         self.patterns = []
-        self.problem = LpProblem("1D-Cutting Stock Problem", LpMinimize)
+        self.problem = LpProblem("1D-CuttingStockProblem", LpMinimize)
         self.objective = LpConstraintVar("objective")
         self.problem.setObjective(self.objective)
         self.get_constraints()
@@ -30,7 +30,7 @@ class MasterProblem:
         """
         for i, item in enumerate(self.items_demand):
             # Create constraintvar and set to >= demand for item
-            constraint = LpConstraintVar(f"C:{i}", LpConstraintGE, item)
+            constraint = LpConstraintVar(f"C:{i}", LpConstraintEQ, item)
             self.constraints.append(constraint)
             self.problem += constraint
 
@@ -51,7 +51,7 @@ class MasterProblem:
         """
         Solves the master problem and returns the optimal dual variables and objective value
         """
-        self.problem.solve()
+        self.problem.solve(apis.PULP_CBC_CMD(msg=False))
 
         return [self.problem.constraints[i].pi for i in self.problem.constraints]
     
@@ -100,13 +100,13 @@ class SubProblem:
     Solves the sub problem for the given dual variables and returns the corresponding pattern and reduced cost.
     """
     def __init__(self, duals, items_length, product_length):
-        self.sub_problem = LpProblem("Sub problem solver", LpMinimize)
+        self.sub_problem = LpProblem("SubProblemSolver", LpMinimize)
         self.variables = [LpVariable(f"S:{i}", 0, None, LpInteger) for i, x in enumerate(duals)]
         # Use duals to set objective coefficients
         self.sub_problem += -lpSum([duals[i]*x for i,x in enumerate(self.variables)])
         self.sub_problem += lpSum([items_length[i]*x for i,x in enumerate(self.variables)]) <= product_length
 
-        self.sub_problem.solve()
+        self.sub_problem.solve(apis.PULP_CBC_CMD(msg=False))
         self.sub_problem.roundSolution()
 
     def return_pattern(self):
@@ -121,6 +121,9 @@ def column_eneration(product_length, items_length, items_demand, item_count):
     """
     Solves the cutting stock problem using column generation.
     """
+    items_length = np.array(items_length)
+    items_demand = np.array(items_demand)
+
     init_patterns = np.eye(item_count)
     master_problem = MasterProblem(product_length, items_length,items_demand, init_patterns)
 
@@ -129,7 +132,6 @@ def column_eneration(product_length, items_length, items_demand, item_count):
     while relaxed is True:
         duals = master_problem.solve()
         new_pattern = master_problem.get_subproblem(duals)
-        print(f"Novy pattern je: {new_pattern}")
         if new_pattern:
             master_problem.add_pattern(new_pattern)
         else:
@@ -137,15 +139,17 @@ def column_eneration(product_length, items_length, items_demand, item_count):
             master_problem.solve()
             relaxed = False
 
-    print(f"Solution: {master_problem.get_objective()} sheets")
+    # print(f"Solution: {master_problem.get_objective()} sheets")
     used_patterns = master_problem.get_used_patterns()
-    [print(f"Pattern {i}: Selected {pattern[0]}: Times {pattern[1]}")
-     for i, pattern in enumerate(used_patterns)]
+    # [print(f"Pattern {i}: Selected {pattern[0]}: Times {pattern[1]}")
+    #  for i, pattern in enumerate(used_patterns)]
+    
+    return master_problem.get_objective(), used_patterns
 
 if __name__ == "__main__":
     product_length = 15
-    items_length = np.array([4,6,7,15,3])
-    items_demand = np.array([80,50,100,56,17])
+    items_length = np.array([4,3,2])
+    items_demand = np.array([80,50,100])
     item_count = items_length.size
 
     column_eneration(product_length, items_length, items_demand, item_count)
