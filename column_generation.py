@@ -6,7 +6,7 @@
 import numpy as np
 from pulp import (LpProblem, LpConstraintVar, LpVariable, apis,
                   lpSum, value,
-                  LpMinimize, LpConstraintGE, LpContinuous, LpInteger)
+                  LpMinimize, LpConstraintEQ, LpContinuous, LpInteger)
 
 class MasterProblem:
     def __init__(self, product_length:int, items_length:np.array, items_demand:np.array, init_patterns:np.array):
@@ -30,7 +30,7 @@ class MasterProblem:
         """
         for i, item in enumerate(self.items_demand):
             # Create constraintvar and set to >= demand for item
-            constraint = LpConstraintVar(f"C:{i}", LpConstraintGE, item)
+            constraint = LpConstraintVar(f"C:{i}", LpConstraintEQ, item)
             self.constraints.append(constraint)
             self.problem += constraint
 

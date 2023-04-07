@@ -124,9 +124,9 @@ class Plot(QtWidgets.QWidget):
             ax.barh(names, pattern, width, left=left)
             left += pattern
         
-        ax.set_ylabel('Patterns')
         ax.set_xlabel('Length')
         ax.set_title("Patterns")
+        ax.legend(items_length)
         self.canvas.draw()
 
     def update_graph(self):
@@ -138,6 +138,8 @@ class Results(QtWidgets.QWidget):
         self.result_box = QtWidgets.QTextEdit(self)
         self.result_box.setMinimumSize(500,270)
         self.result_box.setReadOnly(True)
+        self.result_box.setLineWrapColumnOrWidth(1000) #Here you set the width you want
+        self.result_box.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.FixedPixelWidth)
         self.result_box.setPlainText("The results will be displayed here")
 
         layout = QtWidgets.QVBoxLayout()
@@ -154,15 +156,17 @@ class Results(QtWidgets.QWidget):
         self.print_table(results, items_length)
 
     def print_table(self, results, items_length):
+        results_count = [result[0] for result in results]
+        results = [result[1] for result in results]
+
         # Console output
         table = PrettyTable()
-        field_names = ["Pattern"]
+        field_names = ["Pattern"," Pieces"]
         [field_names.append(str(item_len)) for item_len in items_length]
         table.field_names = field_names
-        results = [result[1] for result in results]
         
         for i, result in enumerate(results):
-            row = [str(i)]
+            row = [str(i), str(results_count[i])]
             for j in range(len(items_length)):
                 row.append(str(result[j]))
             table.add_row(row)
@@ -174,6 +178,7 @@ class Results(QtWidgets.QWidget):
         self.result_box.insertPlainText("\n")
         for j, result in enumerate(results):
             self.result_box.insertPlainText(f"{j}\t")
+            self.result_box.insertPlainText(f"{results_count[j]}\t")
             for i in range(len(result)):
                 self.result_box.insertPlainText(f"{result[i]}\t")
             self.result_box.insertPlainText("\n")
@@ -204,6 +209,9 @@ class UiWindow(QtWidgets.QWidget):
         main_layout.addLayout(right_layout)
         
         self.setLayout(main_layout)
+
+        icon = QtGui.QIcon("static\CSP_icon.png")
+        self.setWindowIcon(icon)
 
     def calculate(self):
         self.results.print_start()
