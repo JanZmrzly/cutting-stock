@@ -41,6 +41,9 @@ python cutting_stock.py
 
 ![Gui GIF](https://github.com/JanZmrzly/cutting-stock/blob/main/static/cutting_stock.gif)
 
+
+![Gui PNG](https://github.com/JanZmrzly/cutting-stock/blob/main/static/cutting_stock.png)
+
 ## Metoda CG
 
  Metoda column generation je optimalizační metoda, která se používá pro řešení kombinatorických optimalizačních problémů, jako je například problém cutting stock, který je řešen v projektu Cutting Stock. Hlavní myšlenkou metody column generation je vytváření nových sloupců (tj. nových řezů trubek) postupným řešením relaxované duální lineární programovací úlohy. Tyto nové sloupce jsou následně přidány do původního celočíselného lineárního programu, aby bylo dosaženo lepšího řešení. Metoda column generation je často používána v kombinaci s celočíselným lineárním programováním pro řešení složitých optimalizačních problémů.
