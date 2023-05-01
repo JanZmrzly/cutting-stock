@@ -39,7 +39,7 @@ V aplikaci Cutting Stock jsou k dispozici dva hlavní výstupy, které jsou zobr
 python cutting_stock.py
 ```
 
-![Gui GIF](https://github.com/JanZmrzly/cutting-stock/blob/main/static/cutting_stock.gif)
+-![Gui GIF](https://github.com/JanZmrzly/cutting-stock/blob/main/static/cutting_stock.gif)
 
 ## Metoda CG
 
