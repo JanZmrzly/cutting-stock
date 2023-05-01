@@ -8,7 +8,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from prettytable import PrettyTable
 
-from column_generation import column_eneration
+from column_generation import column_generation
 
 class NumericDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
@@ -215,7 +215,7 @@ class UiWindow(QtWidgets.QWidget):
     def calculate(self):
         self.results.print_start()
         self.table.save_data()
-        semiproduct_count, cg_results = column_eneration(self.table.product_length_int, 
+        semiproduct_count, cg_results = column_generation(self.table.product_length_int, 
                                                             self.table.items_length, self.table.items_demand,
                                                             self.table.items_count)
             

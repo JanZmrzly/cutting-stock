@@ -117,7 +117,7 @@ class SubProblem:
                 pattern.append(value(variable))
         return pattern
 
-def column_eneration(product_length, items_length, items_demand, item_count):
+def column_generation(product_length, items_length, items_demand, item_count):
     """
     Solves the cutting stock problem using column generation.
     """
